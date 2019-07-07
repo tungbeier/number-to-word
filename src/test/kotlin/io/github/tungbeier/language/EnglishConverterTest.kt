@@ -8,6 +8,12 @@ class EnglishConverterTest {
     private val converter = EnglishConverter()
 
     @Test
+    fun negativeNumbers() {
+        assertEquals("zero", converter.asWord(-0))
+        assertEquals("twenty-one", converter.asWord(-21))
+    }
+
+    @Test
     fun zeroToNineteen() {
         for (i in 0..19) {
             assertEquals(converter.zeroToNineteen[i], converter.asWord(i))

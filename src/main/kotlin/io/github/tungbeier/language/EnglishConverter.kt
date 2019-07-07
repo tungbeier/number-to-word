@@ -49,66 +49,77 @@ class EnglishConverter {
     )
 
     /*
-    100 – one hundred
-    1,000 – one thousand
-    one million – one million
-    one billion – one billion
-    one trillion – one trillion
-    */
-    fun asWord(number: Int): String {
-        val absNumber = abs(number)
+     * Convert a number to its corresponding word.
+     */
+    fun asWord(number: Number): String {
+        if (isGlideNumber(number)) {
+            return convertGlideNumberToWord(abs(number.toLong()))
+        }
+
+        if (isDecimalNumber(number)) {
+
+        }
+
+        throw UnsupportedNumberFormat()
+    }
+
+    fun isGlideNumber(number: Number) = number is Byte || number is Short || number is Int || number is Long
+
+    fun isDecimalNumber(number: Number) = number is Float || number is Double
+
+    private fun convertGlideNumberToWord(number: Long): String {
 
         when {
-            absNumber < TWENTY -> return zeroToNineteen[absNumber]
-            absNumber < HUNDRED -> return getTens(absNumber)
-            absNumber < THOUSAND -> return getHundreds(absNumber)
-            absNumber < MILLION -> return getThousands(absNumber)
-            absNumber < BILLION -> return getMillions(absNumber)
+            number < TWENTY -> return zeroToNineteen[number.toInt()]
+            number < HUNDRED -> return getTens(number)
+            number < THOUSAND -> return getHundreds(number)
+            number < MILLION -> return getThousands(number)
+            number < BILLION -> return getMillions(number)
         }
 
         throw UnsupportedNumberFormat("The number $number is not yet supported.")
     }
 
-    private fun getTens(number: Int): String {
+    private fun getTens(number: Long): String {
         val base = number / TEN
         val rest = number % TEN
-        return tens[base].plus(if (rest == 0) "" else "-".plus(zeroToNineteen[rest]))
+        return tens[base.toInt()].plus(if (rest == 0L) "" else "-".plus(zeroToNineteen[rest.toInt()]))
     }
 
-    private fun getHundreds(number: Int): String {
+    private fun getHundreds(number: Long): String {
         val base = number / HUNDRED
         val rest = number % HUNDRED
-        return zeroToNineteen[base].plus(
+        return zeroToNineteen[base.toInt()].plus(
             " $WORD_HUNDRED"
-                .plus(if (rest == 0) "" else " and ".plus(asWord(rest)))
+                .plus(if (rest == 0L) "" else " and ".plus(convertGlideNumberToWord(rest)))
         )
     }
 
-    private fun getThousands(number: Int): String {
+    private fun getThousands(number: Long): String {
         val base = number / THOUSAND
         val rest = number % THOUSAND
-        return asWord(base).plus(
+        return convertGlideNumberToWord(base).plus(
             " $WORD_THOUSAND"
                 .plus(
                     when {
-                        rest == 0 -> ""
-                        rest < HUNDRED -> " and ".plus(asWord(rest))
-                        else -> ", ".plus(asWord(rest))
+                        rest == 0L -> ""
+                        rest < HUNDRED -> " and ".plus(convertGlideNumberToWord(rest))
+                        else -> ", ".plus(convertGlideNumberToWord(rest))
                     }
                 )
         )
     }
 
-    private fun getMillions(number: Int): String {
+    private fun getMillions(number: Long): String {
         val base = number / MILLION
         val rest = number % MILLION
-        return asWord(base).plus(
+        return convertGlideNumberToWord(base).plus(
             " $WORD_MILLION"
                 .plus(
                     when {
-                        rest == 0 -> ""
-                        rest < THOUSAND -> " and ".plus(asWord(rest))
-                        else -> ", ".plus(asWord(rest))
+                        rest == 0L -> ""
+                        rest < THOUSAND -> " and ".plus(convertGlideNumberToWord(rest))
+                        else -> ", ".plus(convertGlideNumberToWord(rest))
                     }
                 )
         )
