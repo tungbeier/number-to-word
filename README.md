@@ -1,5 +1,5 @@
 # Number To Word
-[![Travis (.org)](https://img.shields.io/travis/tungbeier/number-to-word)](https://travis-ci.org/tungbeier/number-to-word)
+[![Build Status](https://travis-ci.org/tungbeier/number-to-word.svg?branch=master)](https://travis-ci.org/tungbeier/number-to-word)
 
 Convert a number to its corresponding word.
 
