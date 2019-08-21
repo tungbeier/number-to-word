@@ -3,18 +3,16 @@ package io.github.tungbeier.language
 import io.github.tungbeier.language.exceptions.UnsupportedNumberFormat
 import kotlin.math.abs
 
-const val TEN = 10
-const val TWENTY = 20
-const val HUNDRED = 100
-const val THOUSAND = 1000
-const val MILLION = 1_000_000
-const val BILLION = 1_000_000_000
-const val TRILLION = 1_000_000_000_000
+const val TEN = 10L
+const val TWENTY = 20L
+const val HUNDRED = 100L
+const val THOUSAND = 1000L
+const val MILLION = 1_000_000L
+const val BILLION = 1_000_000_000L
 
 const val WORD_HUNDRED = "hundred"
 const val WORD_THOUSAND = "thousand"
 const val WORD_MILLION = "million"
-const val WORD_TRILLION = "trillion"
 
 /** **English numbering rules**
  * - Digits from zero to nine are specific words, as well as numbers from ten to twelve,
@@ -58,61 +56,49 @@ class EnglishConverter {
     fun asWord(number: Long): String {
         val absoluteNumber = abs(number)
 
-        when {
-            absoluteNumber < TWENTY -> return zeroToNineteen[absoluteNumber.toInt()]
-            absoluteNumber < HUNDRED -> return getTens(absoluteNumber)
-            absoluteNumber < THOUSAND -> return getHundreds(absoluteNumber)
-            absoluteNumber < MILLION -> return getThousands(absoluteNumber)
-            absoluteNumber < BILLION -> return getMillions(absoluteNumber)
+        if (absoluteNumber >= BILLION) {
+            throw UnsupportedNumberFormat("The number $number is not yet supported")
         }
 
-        throw UnsupportedNumberFormat("The number $number is not yet supported")
+        return when {
+            absoluteNumber < TWENTY -> zeroToNineteen[absoluteNumber.toInt()]
+            absoluteNumber < HUNDRED -> getTens(absoluteNumber)
+            absoluteNumber < THOUSAND -> getHundreds(absoluteNumber)
+            else -> getWordOverThousands(absoluteNumber)
+        }
     }
 
     private fun getTens(number: Long): String {
         val base = number / TEN
         val rest = number % TEN
-        return tens[base.toInt()].plus(if (rest == 0L) "" else "-".plus(zeroToNineteen[rest.toInt()]))
+        return tens[base.toInt()].plus(
+            if (rest == 0L) "" else "-".plus(zeroToNineteen[rest.toInt()])
+        )
     }
 
     private fun getHundreds(number: Long): String {
         val base = number / HUNDRED
         val rest = number % HUNDRED
         return zeroToNineteen[base.toInt()].plus(
-            " $WORD_HUNDRED"
-                .plus(if (rest == 0L) "" else " and ".plus(asWord(rest)))
+            " $WORD_HUNDRED".plus(
+                if (rest == 0L) "" else " and ".plus(asWord(rest))
+            )
         )
     }
 
-    private fun getThousands(number: Long): String {
-        val base = number / THOUSAND
-        val rest = number % THOUSAND
-        return asWord(base).plus(
-            " $WORD_THOUSAND"
-                .plus(
-                    when {
-                        rest == 0L -> ""
-                        rest < HUNDRED -> " and ".plus(asWord(rest))
-                        else -> ", ".plus(asWord(rest))
-                    }
-                )
-        )
-    }
+    private fun getWordOverThousands(number: Long): String {
+        val baseAsWord = if (number < MILLION) WORD_THOUSAND else WORD_MILLION
+        val base = if (baseAsWord == WORD_THOUSAND) THOUSAND else MILLION
+        val nextLowerBaseNumber = if (baseAsWord == WORD_THOUSAND) HUNDRED else THOUSAND
 
-    private fun getMillions(number: Long): String {
-        val base = number / MILLION
-        val rest = number % MILLION
-        return asWord(base).plus(
-            " $WORD_MILLION"
-                .plus(
-                    when {
-                        rest == 0L -> ""
-                        rest < THOUSAND -> " and ".plus(asWord(rest))
-                        else -> ", ".plus(asWord(rest))
-                    }
-                )
-        )
+        val rest = number % base
+        val restAsWord = when {
+            rest == 0L -> ""
+            rest < nextLowerBaseNumber -> " and ".plus(asWord(rest))
+            else -> ", ".plus(asWord(rest))
+        }
+
+        return asWord(number / base).plus(" $baseAsWord").plus(restAsWord)
     }
 }
-
 

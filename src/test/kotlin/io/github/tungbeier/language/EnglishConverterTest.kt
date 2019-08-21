@@ -12,10 +12,10 @@ class EnglishConverterTest {
     @Test
     fun `Expect exception when number is not yet supported`() {
         val exception = assertFailsWith<UnsupportedNumberFormat> {
-            converter.asWord(1_000_000_000_000)
+            converter.asWord(1_000_000_000_000_000_000)
         }
 
-        assertEquals("The number 1000000000000 is not yet supported", exception.message)
+        assertEquals("The number 1000000000000000000 is not yet supported", exception.message)
     }
 
     @Test
