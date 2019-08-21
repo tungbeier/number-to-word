@@ -1,6 +1,6 @@
 package io.github.tungbeier.language
 
-import io.github.tungbeier.language.exceptions.UnsupportedNumberFormat
+import io.github.tungbeier.language.exception.UnsupportedNumberFormat
 import kotlin.math.abs
 
 const val TEN = 10L

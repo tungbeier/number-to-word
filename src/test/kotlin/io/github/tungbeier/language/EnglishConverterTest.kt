@@ -1,6 +1,6 @@
 package io.github.tungbeier.language
 
-import io.github.tungbeier.language.exceptions.UnsupportedNumberFormat
+import io.github.tungbeier.language.exception.UnsupportedNumberFormat
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
