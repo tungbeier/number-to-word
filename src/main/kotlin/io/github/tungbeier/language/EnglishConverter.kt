@@ -24,7 +24,7 @@ const val WORD_TRILLION = "trillion"
  * adding the -teen suffix at the end: thirteen [13], fourteen [14], fifteen [15],
  * sixteen [16], seventeen [17], eighteen [18], and nineteen [19].
  * - The tens are formed by adding the -(t)y suffix at the end of the multiplier digit root,
- * with the exception of ten: ten [10], twenty [20], thirty [30], forty [40] (and not fourty),
+ * with the exception of ten: ten [10], twenty [20], thirty [30], forty [40] (and not forty),
  * fifty [50], sixty [60], seventy [70], eighty [80], and ninety [90].
  * - From twenty-one to ninety-nine, the tens and units are joined with a hyphen.
  * - All the three-digit numbers are constructed by stating the hundreds,
@@ -37,48 +37,36 @@ const val WORD_TRILLION = "trillion"
  * and units (e.g.: seven hundred and three [703], or five thousand and two [5,002]).
  */
 class EnglishConverter {
-    internal val zeroToNineteen = arrayOf(
+    private val zeroToNineteen = arrayOf(
         "zero", "one", "two", "three", "four", "five", "six", "seven",
         "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen",
         "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"
     )
 
-    internal val tens = arrayOf(
+    private val tens = arrayOf(
         "", "",
         "twenty", "thirty", "forty", "fifty",
         "sixty", "seventy", "eighty", "ninety"
     )
 
-    /*
+    /**
      * Convert a number to its corresponding word.
+     *
+     * @param number as Long
+     * @return the corresponding word to the given number
      */
-    fun asWord(number: Number): String {
-        if (isGlideNumber(number)) {
-            return convertGlideNumberToWord(abs(number.toLong()))
-        }
-
-        if (isDecimalNumber(number)) {
-            // todo
-        }
-
-        throw UnsupportedNumberFormat()
-    }
-
-    fun isGlideNumber(number: Number) = number is Byte || number is Short || number is Int || number is Long
-
-    fun isDecimalNumber(number: Number) = number is Float || number is Double
-
-    private fun convertGlideNumberToWord(number: Long): String {
+    fun asWord(number: Long): String {
+        val absoluteNumber = abs(number)
 
         when {
-            number < TWENTY -> return zeroToNineteen[number.toInt()]
-            number < HUNDRED -> return getTens(number)
-            number < THOUSAND -> return getHundreds(number)
-            number < MILLION -> return getThousands(number)
-            number < BILLION -> return getMillions(number)
+            absoluteNumber < TWENTY -> return zeroToNineteen[absoluteNumber.toInt()]
+            absoluteNumber < HUNDRED -> return getTens(absoluteNumber)
+            absoluteNumber < THOUSAND -> return getHundreds(absoluteNumber)
+            absoluteNumber < MILLION -> return getThousands(absoluteNumber)
+            absoluteNumber < BILLION -> return getMillions(absoluteNumber)
         }
 
-        throw UnsupportedNumberFormat("The number $number is not yet supported.")
+        throw UnsupportedNumberFormat("The number $number is not yet supported")
     }
 
     private fun getTens(number: Long): String {
@@ -92,20 +80,20 @@ class EnglishConverter {
         val rest = number % HUNDRED
         return zeroToNineteen[base.toInt()].plus(
             " $WORD_HUNDRED"
-                .plus(if (rest == 0L) "" else " and ".plus(convertGlideNumberToWord(rest)))
+                .plus(if (rest == 0L) "" else " and ".plus(asWord(rest)))
         )
     }
 
     private fun getThousands(number: Long): String {
         val base = number / THOUSAND
         val rest = number % THOUSAND
-        return convertGlideNumberToWord(base).plus(
+        return asWord(base).plus(
             " $WORD_THOUSAND"
                 .plus(
                     when {
                         rest == 0L -> ""
-                        rest < HUNDRED -> " and ".plus(convertGlideNumberToWord(rest))
-                        else -> ", ".plus(convertGlideNumberToWord(rest))
+                        rest < HUNDRED -> " and ".plus(asWord(rest))
+                        else -> ", ".plus(asWord(rest))
                     }
                 )
         )
@@ -114,18 +102,17 @@ class EnglishConverter {
     private fun getMillions(number: Long): String {
         val base = number / MILLION
         val rest = number % MILLION
-        return convertGlideNumberToWord(base).plus(
+        return asWord(base).plus(
             " $WORD_MILLION"
                 .plus(
                     when {
                         rest == 0L -> ""
-                        rest < THOUSAND -> " and ".plus(convertGlideNumberToWord(rest))
-                        else -> ", ".plus(convertGlideNumberToWord(rest))
+                        rest < THOUSAND -> " and ".plus(asWord(rest))
+                        else -> ", ".plus(asWord(rest))
                     }
                 )
         )
     }
-
 }
 
 
