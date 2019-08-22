@@ -1,22 +1,11 @@
 package io.github.tungbeier.language
 
-import io.github.tungbeier.language.exception.UnsupportedNumberFormat
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 class EnglishConverterTest {
 
     private val converter = EnglishConverter()
-
-    @Test
-    fun `Expect exception when number is not yet supported`() {
-        val exception = assertFailsWith<UnsupportedNumberFormat> {
-            converter.asWord(1_000_000_000_000_000_000)
-        }
-
-        assertEquals("The number 1000000000000000000 is not yet supported", exception.message)
-    }
 
     @Test
     fun `Test negative numbers`() {
@@ -73,10 +62,68 @@ class EnglishConverterTest {
     @Test
     fun `Test numbers between 1_000_000 and 999_999_999`() {
         hashMapOf(
-            1_000_021 to "one million and twenty-one",
-            2_176_045 to "two million, one hundred and seventy-six thousand and forty-five",
-            75_426_328 to "seventy-five million, four hundred and twenty-six thousand, three hundred and twenty-eight",
-            974_531_248 to "nine hundred and seventy-four million, five hundred and thirty-one thousand, two hundred and forty-eight"
-        ).forEach { (number, word) -> assertEquals(word, converter.asWord(number.toLong())) }
+            1_000_021L to "one million and twenty-one",
+            2_176_045L to "two million, one hundred and seventy-six thousand and forty-five",
+            75_426_328L to "seventy-five million, four hundred and twenty-six thousand, three hundred and twenty-eight",
+
+            974_531_248L to "nine hundred and seventy-four million, "
+                    + "five hundred and thirty-one thousand, two hundred and forty-eight"
+        ).forEach { (number, word) -> assertEquals(word, converter.asWord(number)) }
+    }
+
+    @Test
+    fun `Test numbers between 1_000_000_000 and 999_999_999_999`() {
+        hashMapOf(
+            1_000_000_001L to "one billion and one",
+
+            2_753_246_372L to "two billion, seven hundred and fifty-three million, "
+                    + "two hundred and forty-six thousand, three hundred and seventy-two",
+
+            62_723_526_208L to "sixty-two billion, seven hundred and twenty-three million, "
+                    + "five hundred and twenty-six thousand, two hundred and eight",
+
+            757_257_842_755L to "seven hundred and fifty-seven billion, two hundred and fifty-seven million, "
+                    + "eight hundred and forty-two thousand, seven hundred and fifty-five"
+        ).forEach { (number, word) -> assertEquals(word, converter.asWord(number)) }
+    }
+
+    @Test
+    fun `Test numbers between 1_000_000_000_000 and 999_999_999_999_999`() {
+        hashMapOf(
+            2_000_000_000_002L to "two trillion and two",
+
+            62_753_244_246_372L to "sixty-two trillion, seven hundred and fifty-three billion, "
+                    + "two hundred and forty-four million, two hundred and forty-six thousand, three hundred and seventy-two",
+
+            945_757_257_842_755L to "nine hundred and forty-five trillion, "
+                    + "seven hundred and fifty-seven billion, two hundred and fifty-seven million, "
+                    + "eight hundred and forty-two thousand, seven hundred and fifty-five"
+        ).forEach { (number, word) -> assertEquals(word, converter.asWord(number)) }
+    }
+
+    @Test
+    fun `Test numbers between 1_000_000_000_000_000 and 999_999_999_999_999_999`() {
+        hashMapOf(
+            3_000_000_000_000_003L to "three quadrillion and three",
+
+            77_555_333_111_222_444L to "seventy-seven quadrillion, five hundred and fifty-five trillion, "
+                    + "three hundred and thirty-three billion, one hundred and eleven million, "
+                    + "two hundred and twenty-two thousand, four hundred and forty-four",
+
+            888_537_372_424_660_531L to "eight hundred and eighty-eight quadrillion, "
+                    + "five hundred and thirty-seven trillion, three hundred and seventy-two billion, "
+                    + "four hundred and twenty-four million, six hundred and sixty thousand, five hundred and thirty-one"
+        ).forEach { (number, word) -> assertEquals(word, converter.asWord(number)) }
+    }
+
+    @Test
+    fun `Test biggest possible long value`() {
+        assertEquals(
+            "nine quintillion, two hundred and twenty-three quadrillion, "
+                    + "three hundred and seventy-two trillion, thirty-six billion, "
+                    + "eight hundred and fifty-four million, seven hundred and seventy-five thousand, "
+                    + "eight hundred and seven",
+            converter.asWord(Long.MAX_VALUE)
+        )
     }
 }

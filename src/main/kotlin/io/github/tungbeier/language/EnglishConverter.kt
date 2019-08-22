@@ -1,6 +1,5 @@
 package io.github.tungbeier.language
 
-import io.github.tungbeier.language.exception.UnsupportedNumberFormat
 import kotlin.math.abs
 
 const val TEN = 10L
@@ -9,10 +8,17 @@ const val HUNDRED = 100L
 const val THOUSAND = 1000L
 const val MILLION = 1_000_000L
 const val BILLION = 1_000_000_000L
+const val TRILLION = 1_000_000_000_000L
+const val QUADRILLION = 1_000_000_000_000_000L
+const val QUINTILLION = 1_000_000_000_000_000_000L
 
 const val WORD_HUNDRED = "hundred"
 const val WORD_THOUSAND = "thousand"
 const val WORD_MILLION = "million"
+const val WORD_BILLION = "billion"
+const val WORD_TRILLION = "trillion"
+const val WORD_QUADRILLION = "quadrillion"
+const val WORD_QUINTILLION = "quintillion"
 
 /** **English numbering rules**
  * - Digits from zero to nine are specific words, as well as numbers from ten to twelve,
@@ -48,17 +54,14 @@ class EnglishConverter {
     )
 
     /**
-     * Convert a number to its corresponding word.
+     * Convert a number to its corresponding word.<br/>
+     * Supported up to include the Long.MAX_VALUE.
      *
      * @param number as Long
      * @return the corresponding word to the given number
      */
     fun asWord(number: Long): String {
         val absoluteNumber = abs(number)
-
-        if (absoluteNumber >= BILLION) {
-            throw UnsupportedNumberFormat("The number $number is not yet supported")
-        }
 
         return when {
             absoluteNumber < TWENTY -> zeroToNineteen[absoluteNumber.toInt()]
@@ -87,18 +90,29 @@ class EnglishConverter {
     }
 
     private fun getWordOverThousands(number: Long): String {
-        val baseAsWord = if (number < MILLION) WORD_THOUSAND else WORD_MILLION
-        val base = if (baseAsWord == WORD_THOUSAND) THOUSAND else MILLION
-        val nextLowerBaseNumber = if (baseAsWord == WORD_THOUSAND) HUNDRED else THOUSAND
+        val baseNumber = getBaseNumber(number)
 
-        val rest = number % base
+        val rest = number % baseNumber.base
         val restAsWord = when {
             rest == 0L -> ""
-            rest < nextLowerBaseNumber -> " and ".plus(asWord(rest))
+            rest < baseNumber.nextLowerBase -> " and ".plus(asWord(rest))
             else -> ", ".plus(asWord(rest))
         }
 
-        return asWord(number / base).plus(" $baseAsWord").plus(restAsWord)
+        return asWord(number / baseNumber.base).plus(" ${baseNumber.word}").plus(restAsWord)
+    }
+
+    data class BaseNumber(val base: Long, val word: String, val nextLowerBase: Long)
+
+    private fun getBaseNumber(number: Long): BaseNumber {
+        return when {
+            number < MILLION -> BaseNumber(THOUSAND, WORD_THOUSAND, HUNDRED)
+            number < BILLION -> BaseNumber(MILLION, WORD_MILLION, THOUSAND)
+            number < TRILLION -> BaseNumber(BILLION, WORD_BILLION, MILLION)
+            number < QUADRILLION -> BaseNumber(TRILLION, WORD_TRILLION, BILLION)
+            number < QUINTILLION -> BaseNumber(QUADRILLION, WORD_QUADRILLION, TRILLION)
+            else -> BaseNumber(QUINTILLION, WORD_QUINTILLION, QUADRILLION)
+        }
     }
 }
 
